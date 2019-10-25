@@ -8,5 +8,15 @@ public class CalculaFibonacci {
             return (calculaFibonacci(numero-2) + calculaFibonacci(numero-1));
         }
     }
+	
+	public static void main(String[] args){
+		long temps =System.currentTimeMillis()/1000;
+		
+		long resultat = calculaFibonacci(45);
+		System.out.println(resultat);
+		
+		System.out.println(System.currentTimeMillis()/1000 - temps);
+        
+    }
 
 }
