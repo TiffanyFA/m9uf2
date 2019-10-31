@@ -11,15 +11,12 @@ public class MaximTask extends RecursiveTask<Short> {
 	public MaximTask(short[] arr, int inici, int fi) {
 		this.arr = arr;
 		this.inici = inici;
-		this.fi = fi;
-		
+		this.fi = fi;		
 	}
 
 	private short getMaxSeq() {
 		short max = arr[inici];
-		for (int i = inici + 1; i < fi; i++) {
-			count++;
-			System.out.println("Comptador " + count + " Inici " + inici + " Fi " + fi);
+		for (int i = inici + 1; i < fi; i++) {			
 			if (arr[i] > max) {
 				max = arr[i];
 			}
@@ -34,27 +31,27 @@ public class MaximTask extends RecursiveTask<Short> {
 		int mig = (inici + fi) / 2 + 1;
 		task1 = new MaximTask(arr, inici, mig);
 		task1.fork();
+		System.out.println(" Inici tasca1: " + inici + " Final: " + mig);
 		task2 = new MaximTask(arr, mig, fi);
-		task2.fork();	
+		task2.fork();
+		System.out.println(" Inici tasca2: " + mig + " Final: " + fi);
+		count++;
+		System.out.println("Comptador " + task1.getQueuedTaskCount() + " Inici " + inici + " Fi " + fi);
+		
 		
 		return (short) Math.max(task1.join(), task2.join());
 	}
 
 	@Override
 	protected Short compute() {	
-		
 		if (fi - inici <= LLINDAR) {			
-			
 			return getMaxSeq();			
 		} else {
-			
-			//System.out.println("Comptador " + count + " Inici " + inici + " Fi " + fi);
 			return getMaxReq();
 		}
 	}
 
 	public static void main(String[] args) {
-		int count = 0;
 		short[] data = createArray(100000000);
 
 		// Mira el número de processadors
@@ -67,10 +64,11 @@ public class MaximTask extends RecursiveTask<Short> {
 
 		long time = System.currentTimeMillis();
 		// crida la tasca i espera que es completin
-		short result1 = pool.invoke(tasca);
+		short result1 = pool.invoke(tasca);			
 		
 		// màxim
 		int result = tasca.join();
+		
 		System.out.println("Temps utilitzat:" + (System.currentTimeMillis() - time));
 		System.out.println("Màxim es " + result);
 	}
