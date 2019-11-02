@@ -18,71 +18,96 @@ Client 1 article 4/ (3 segons)...
 Client 1 article 5/5 (7 segons)...FINALITZAT
 
  */
-import java.util.*;
 import java.util.concurrent.*;
 
 public class Apartat1 {
-	// Fil Callable
-    class Client implements  Callable<int[]>, Runnable {
+	// classe client
+    public static class Client {
     	//atributs
     	private int num;
-    	
+    	private int identificador;    	
     	
     	//constructor
-    	public Client (int num) {
+    	public Client (int num, int id) {
     		this.num = num;
-    		
+    		identificador = id;    		
     	}
-        @Override
-        public int[] call() throws InterruptedException {
-        	int [] llistaArticles =  new int [num]; 
-        	Thread.sleep(3000);        	       	
-    		for (int i = 0; i < llistaArticles.length; i++) {        			
-    			llistaArticles[i] = (int) (Math.random()*10);  
-    			System.out.print("Creat el client " + i + " amb " + num + " articles(");    			
-    		}
-    		for (int j = 0; j < llistaArticles.length; j++) {
-			System.out.print(llistaArticles[j] + ", ");	
-			}
-    		return llistaArticles;
-        }
-		@Override
-		public void run() {
-			for (int i = 0; i < 10; i++) {
-				
-			}
-			
+    	
+        public int getIdentificador() {
+			return identificador;
 		}
+
+		public int getNum() {
+			return num;
+		}	
+
+		public int[] getCistella() {
+			return omplirCistella();
+		}
+		
+		public int[] omplirCistella() {
+			int [] llistaArticles =  new int [num];        	       	       	
+    		for (int i = 0; i < llistaArticles.length; i++) {        			
+    			llistaArticles[i] = (int) (Math.random()*10);      			
+    		}
+    		
+    		return llistaArticles;
+		}
+		
+		public void mostrarCistella(int [] llistaArticles) {
+			for (int j = 0; j < llistaArticles.length; j++) {
+				System.out.print(llistaArticles[j] + ", ");	
+				}
+		}
+    }
+    
+    //classe caixa
+    public static class Caixa implements Runnable{
+    	//atributs
+    	private Client client;    	
+    	
+    	//constructor
+		public Caixa(Client client ) {
+			super();
+			this.client = client;			
+		}
+
+		@Override
+		public void run() {	
+			try {	        	       	       	
+				long tempsEntreArticles = (long) Math.floor(Math.random()*(1000-8000+1000)+8000);
+				long tempsInicial = System.currentTimeMillis();
+				long tempsFinal;
+				System.out.print("Creat el client " + this.client.getIdentificador() + " amb " + this.client.getCistella().length + " articles("); 
+				this.client.mostrarCistella(this.client.getCistella());
+				System.out.print(")");
+				System.out.println();
+				System.out.println("Client " + this.client.getIdentificador() + " passa per caixa...");
+				for (int i = 1; i < this.client.getCistella().length + 1; i++) {
+					Thread.sleep(tempsEntreArticles);
+					System.out.println("Client " + this.client.getIdentificador() + " article " + i + "/" + this.client.getCistella().length +
+							" (" + ((System.currentTimeMillis() - tempsInicial) / 1000) + " segons)...");
+				}	
+				System.out.println("Client " + this.client.getIdentificador() + " FINALITZAT");
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}			
+		}    	
     }
 
 	
 	public static void main(String[] args) throws InterruptedException, ExecutionException {
-		//creacio d'un executor amb 5 fils
-		ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
-		//creacio d'una llista on desar els objectes Suma
-		List<Client> cistelles= new ArrayList<Client>();
-		//es sumen números aleatoris 25 vegades i es desen en la llista
-		for (int i = 0; i < 50; i++) {
-			Client articles = new Client((int)(Math.random()*30));
-    		cistelles.add(articles);			
-		}
-		//Es crea una llista que guardarà els resultats
-		int[] llistaCistelles;
-		//Omple la llista amb els resultats ja resolts (quan estan tots resolts)
-		llistaCistelles = executor.invokeAny(cistelles);
-		
+		//creacio d'un executor amb 10 fils
+		ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);		
+		//es creen 50 clients
+		for (int i = 1; i < 51; i++) {			
+			Client client = new Client((int)(Math.floor(Math.random()*(1-30+1)+30)), i);
+			Runnable run = new Caixa (client);
+			executor.execute(run);
+			Thread.sleep(3000); 			
+		}		
 		//Tancar tots els fils
 		executor.shutdown();
-		
-//		//imprimeix resultat
-//		for (int i = 0; i < llistaResultats.size(); i++) {
-//			Future<Integer> resultat = llistaResultats.get(i);
-//			try {
-//				System.out.println("Resultat tasca "+i+ " és:" +
-//				resultat.get());
-//			} 
-//			catch (InterruptedException | ExecutionException e)	{
-//			}
-//		}
 	}
 }
