@@ -74,8 +74,9 @@ public class Apartat1 {
 
 		@Override
 		public void run() {	
-			try {	        	       	       	
-				long tempsEntreArticles = (long) Math.floor(Math.random()*(1000-8000+1000)+8000);
+			try {
+				// crear gestió de temps
+				long tempsEntreArticles = (long) Math.floor(Math.random()*(2000-8000+2000)+8000);
 				long tempsInicial = System.currentTimeMillis();
 				long tempsFinal;
 				System.out.print("Creat el client " + this.client.getIdentificador() + " amb " + this.client.getCistella().length + " articles("); 
@@ -101,10 +102,12 @@ public class Apartat1 {
 		//creacio d'un executor amb 10 fils
 		ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);		
 		//es creen 50 clients
-		for (int i = 1; i < 51; i++) {			
+		for (int i = 1; i < 51; i++) {	
+			//crea client amb quantitat d'articles aleatoris entre 1 i 30
 			Client client = new Client((int)(Math.floor(Math.random()*(1-30+1)+30)), i);
 			Runnable run = new Caixa (client);
 			executor.execute(run);
+			//crea un client cada 3'
 			Thread.sleep(3000); 			
 		}		
 		//Tancar tots els fils

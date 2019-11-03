@@ -18,7 +18,7 @@ public class Apartat3a_recursiva {
     public static void main(String[] args){
 		long temps =System.currentTimeMillis()/1000;
 		
-		long resultat = potenciaConRecursion(10,10);
+		long resultat = potenciaConRecursion(12500,9);
 		System.out.println(resultat);
 		
 		System.out.println(System.currentTimeMillis()/1000 - temps);
