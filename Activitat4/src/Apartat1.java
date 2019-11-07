@@ -42,6 +42,9 @@ public class Apartat1 {
 		}	
 		
 		
+		
+		
+		
 
 		public int[] getCistella() {
 			return omplirCistella();
