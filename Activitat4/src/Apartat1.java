@@ -40,6 +40,8 @@ public class Apartat1 {
 		public int getNum() {
 			return num;
 		}	
+		
+		
 
 		public int[] getCistella() {
 			return omplirCistella();
