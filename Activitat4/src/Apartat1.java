@@ -39,12 +39,7 @@ public class Apartat1 {
 
 		public int getNum() {
 			return num;
-		}	
-		
-		
-		
-		
-		
+		}			
 
 		public int[] getCistella() {
 			return omplirCistella();
@@ -83,7 +78,6 @@ public class Apartat1 {
 				// crear gestió de temps
 				long tempsEntreArticles = (long) Math.floor(Math.random()*(2000-8000+2000)+8000);
 				long tempsInicial = System.currentTimeMillis();
-				long tempsFinal;
 				System.out.print("Creat el client " + this.client.getIdentificador() + " amb " + this.client.getCistella().length + " articles("); 
 				this.client.mostrarCistella(this.client.getCistella());
 				System.out.print(")");
