@@ -7,7 +7,7 @@ public class Apartat3a_recursiva {
 
     //Método 2 para calcular la potencia
     public static int potenciaConRecursion (int m, int n) {
-    	//double calcul = java.lang.Math.cos(54879854);
+    	double calcul = java.lang.Math.cos(54879854);
         if (n == 0) { 
         	return 1;
         } else  {
@@ -16,12 +16,12 @@ public class Apartat3a_recursiva {
     }
     
     public static void main(String[] args){
-		long temps =System.currentTimeMillis()/1000;
+		long temps =System.currentTimeMillis();
 		
-		long resultat = potenciaConRecursion(12500,9);
+		long resultat = potenciaConRecursion(54870,30);
 		System.out.println(resultat);
 		
-		System.out.println(System.currentTimeMillis()/1000 - temps);
+		System.out.println(System.currentTimeMillis() - temps);
         
     }
 }
