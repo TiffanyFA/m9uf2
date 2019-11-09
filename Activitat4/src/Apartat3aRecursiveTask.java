@@ -42,12 +42,13 @@ public class Apartat3aRecursiveTask extends RecursiveTask<Long> {
 		long temps = System.currentTimeMillis();
 		System.out.println(temps);
 		
-		long base = 4;
-		long exp = 30;
+		long base = 400;
+		long exp = 15;
 		
 		//long Future l = pool.invoke(new Apartat3aRecursiveTask(base, exp));
 		
 		System.out.println("Calculat:  " + pool.invoke(new Apartat3aRecursiveTask(base, exp)));
+		pool.shutdown();
 		//if (pool.awaitTermination(4, TimeUnit.SECONDS)) {}
 		
 		

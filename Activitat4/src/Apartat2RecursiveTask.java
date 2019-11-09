@@ -65,7 +65,7 @@ public class Apartat2RecursiveTask {
 		data = fjp.invoke(task);
 
 		for (int i = 0; i < data.length; i++) {
-			System.out.println(data[i] + " ");
+			
 		}
 
 	}
