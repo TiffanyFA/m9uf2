@@ -56,7 +56,7 @@ class PanelNau extends JPanel implements Runnable, KeyListener {
 	String colorNau;
 	Dispar dispar;
 	String colorDispar;
-	Vector<Dispar> dispars;
+	Vector<Dispar> dispars = new Vector<Dispar>();
 
 	public PanelNau() {
 		nau = new Nau[numNaus];		
@@ -107,6 +107,12 @@ class PanelNau extends JPanel implements Runnable, KeyListener {
 		for (int i = 0; i < nau.length; ++i)
 			nau[i].pinta(g);
 		nauPropia.pinta(g);
+		
+		for (int i = 0; i < dispars.size(); i++) {
+			Dispar index = dispars.get(i);
+			index.pinta(g);
+			//dispars.remove(index);
+		}
 	}
 
 	// Metodes necesaris per gestionar esdeveniments del teclat
