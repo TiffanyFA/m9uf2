@@ -56,10 +56,11 @@ class PanelNau extends JPanel implements Runnable, KeyListener {
 	String colorNau;
 	Dispar dispar;
 	String colorDispar;
+	boolean continuar = true;
 	Vector<Dispar> dispars = new Vector<Dispar>();
-
+	
 	public PanelNau() {
-		nau = new Nau[numNaus];		
+		nau = new Nau[numNaus];	
 		for (int i = 0; i < nau.length; i++) {
 			Random rand = new Random();
 			int velocitat = (rand.nextInt(3) + 5) * 10;
@@ -74,13 +75,14 @@ class PanelNau extends JPanel implements Runnable, KeyListener {
 
 		// Creo la nau propia
 		colorNau = "nauBlava";
-		nauPropia = new Nau("NauNostra", colorNau, 200, 400, 10, 0, 100);
-		
-		//Crea els dispars
-		
+		nauPropia = new Nau("NauNostra", colorNau, 200, 400, 0, 0, 200);		
 
 		// Creo fil per anar pintant cada 0,1 segons el joc per pantalla
 		Thread n = new Thread(this);
+		/*se li dona prioritat ja que és el fil que fa totes les comprovacions de interaccions entre
+		 * naus i dispars i repinta		
+		*/
+		n.setPriority(7);
 		n.start();
 
 		// Creo listeners per a que el fil principal del programa gestioni
@@ -89,29 +91,85 @@ class PanelNau extends JPanel implements Runnable, KeyListener {
 		setFocusable(true);
 
 	}
+	
+	public void setContinuar(boolean continuar) {
+		this.continuar = continuar;
+	}
+	
+	//mètode que fa explotar el dispar si arriba al final de la pantalla
+	public void explota(){
+		//En cas que el dispar es sorti del marge 
+		for (int i = 0; i < dispars.size(); i++) {
+			Dispar dispar = dispars.get(i);
+			if (dispar.eliminar()) {
+			dispars.remove(dispar);
+			dispar.noSeguir();
+			}
+		}		
+	}
+	
+	//mètode que comprova si queden enemics
+	public void comprovarEnemics() {
+		int count = 0;
+		int tamany = nau.length;
+		for (int i = 0; i < tamany; i++) {
+			if (nau[i] == null) {
+				count++;
+			}
+		}
+		if (count == tamany) {
+			System.out.println("HAS GUANYAT!!");
+			setContinuar(false);
+		}
+	}
+	
+	//mètode que comprova si les naus xoquen amb nauPropia
+	public void comprovarXoc() {
+		for (int j = 0; j < nau.length; j++) {
+			if (nau[j]!=null) {
+				double calcul;						
+				calcul = Math.sqrt(Math.pow(nau[j].getPosicioX() + 35 - nauPropia.getPosicioX() + 35, 2) +
+							Math.pow(nau[j].getPosicioY() + 45 - nauPropia.getPosicioY() +45  , 2));
+				if (calcul < 30){
+					System.out.println("HAS PERDUT");
+					setContinuar(false);					
+				}
+			}
+		}
+	}
 
 	public void run() {
-		System.out.println("Inici fil repintar");
-		while (true) {
+		while (continuar) {
 			try {
 				Thread.sleep(100);
 			} catch (Exception e) {
 			} // espero 0,1 segons
+			//fa explotar el dispar si arriba al final de la pantalla
+			explota();
+			//destrueix les naus que són disparades
+			comprovaDispars();
+			//comprova si queden naus enemigues
+			comprovarEnemics();
+			//comprovar si alguna nau xoca amb mi
+			comprovarXoc();			
 			// System.out.println("Repintant");
 			repaint();
 		}
+		//tanca el joc
+		System.exit(0);	
 	}
 
-	public void paintComponent(Graphics g) {
+	public synchronized void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		for (int i = 0; i < nau.length; ++i)
-			nau[i].pinta(g);
-		nauPropia.pinta(g);
-		
+		for (int i = 0; i < nau.length; ++i){
+			if (nau[i]!=null) { 
+				nau[i].pinta(g);
+				nauPropia.pinta(g);
+			}			
+		}
 		for (int i = 0; i < dispars.size(); i++) {
 			Dispar index = dispars.get(i);
 			index.pinta(g);
-			//dispars.remove(index);
 		}
 	}
 
@@ -126,19 +184,40 @@ class PanelNau extends JPanel implements Runnable, KeyListener {
 		// e.getKeyChar());
 		if (e.getKeyCode() == 37) {
 			nauPropia.esquerra();
-		} // System.out.println("a l'esquerra"); }
+		} 
 		if (e.getKeyCode() == 39) {
 			nauPropia.dreta();
-		} // System.out.println("a la dreta"); }
+		} 
 		if (e.getKeyCode() == 32) {
 			colorDispar = "disparBlau";
-			dispar = new Dispar(colorDispar, nauPropia.getPosicioX(), nauPropia.getPosicioY(), 3, 100);
-			dispars.add(dispar);
+			dispar = new Dispar(colorDispar, nauPropia.getPosicioX()+35, nauPropia.getPosicioY(), -3, 100);
+			dispars.add(dispar);			
 		}
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e) {
+	}
+	
+	public void comprovaDispars(){
+		//En cas que el dispar impacti amb una nau
+		for (int i = 0; i < dispars.size(); i++) {
+			Dispar index = dispars.get(i);
+			for (int j = 0; j < nau.length; j++) {
+				if (nau[j]!=null) {
+					double calcul;						
+					calcul = Math.sqrt(Math.pow(nau[j].getPosicioX() - index.getPosicioX(), 2) +
+					Math.pow(nau[j].getPosicioY() - index.getPosicioY(), 2));
+					if (calcul < 10){
+						System.out.println("XOCA!!");
+						nau[j].noSeguir();
+						nau[j] = null;					
+						dispars.remove(index);
+						i--;
+					}
+				}
+			}
+		}	
 	}
 }
 
@@ -148,7 +227,8 @@ class Nau extends Thread {
 	private int dsx, dsy, v;
 	private int tx = 10;
 	private int ty = 10;
-
+	private boolean seguir = true;
+	ThreadGroup grupNaus = new ThreadGroup ("naus");
 	private String img = "/images/nauBlava.jpg";
 	private Image image;
 
@@ -160,15 +240,19 @@ class Nau extends Thread {
 		this.dsy = dsy;
 		this.v = v;
 		image = new ImageIcon(Nau.class.getResource(colorNau + ".png")).getImage();
-		Thread t = new Thread(this);
+		Thread t = new Thread(grupNaus, this, "nau");
 		t.start();
+	}
+
+	public void noSeguir() {
+		seguir = false;	
 	}
 
 	public int velocitat() {
 		return v;
 	}
 
-	public void moure() {
+	public synchronized void moure() {
 		x = x + dsx;
 		y = y + dsy;
 		// si arriva als marges ...
@@ -178,7 +262,7 @@ class Nau extends Thread {
 			dsy = -dsy;
 	}
 
-	public void pinta(Graphics g) {
+	public synchronized void pinta(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g;
 		g2d.drawImage(this.image, x, y, null);
 	}
@@ -192,7 +276,7 @@ class Nau extends Thread {
 	}
 	
 	public void run() {
-		while (true) {
+		while (seguir) {
 			// System.out.println("Movent nau numero " + this.nomNau);
 			try {
 				Thread.sleep(this.v);
@@ -203,52 +287,72 @@ class Nau extends Thread {
 	}
 
 	public void esquerra() {
-		this.dsx = -2;
+		this.dsx = -20;
 	}
 
 	public void dreta() {
-		this.dsx = 2;
+		this.dsx = 20;
 	}
 }
 
 class Dispar extends Thread {
 	private int x, y;
-	private int dsx, dsy, v;
-	private int tx = 10;
+	private int dsy, v;	
 	private int ty = 10;
-
+	private boolean seguir;
 	private String img = "disparVermell.jpg";
 	private Image image;
-	private String colorDispar = "disparVermell";	
+	private String colorDispar = "disparVermell";
+	ThreadGroup grupDispars = new ThreadGroup ("dispars");
 	
-	public Dispar (String colorDispar, int x, int y, int dsx, int v) {
+	public Dispar (String colorDispar, int x, int y, int dsy, int v) {
 		this.x = x;
 		this.y = y;
-		this.dsx = dsx;
+		this.dsy = dsy;
 		this.v = v;
+		seguir = true;
 		image = new ImageIcon(Nau.class.getResource(colorDispar + ".png")).getImage();
-		Thread t = new Thread(this);
+		Thread t = new Thread(grupDispars, this, "blaus");
 		t.start();
+	}
+
+	public int getPosicioX() {
+		// TODO Auto-generated method stub
+		return x;
+	}
+	
+	public int getPosicioY() {
+		// TODO Auto-generated method stub
+		return y;
 	}
 
 	public int velocitat() {
 		return v;
 	}
 
-	public void moure() {
-		x = x + dsx;
-		// si arriva als marges ...
-		if (y >= 500 - ty || y <= ty)
-			dsy = -dsy;
+	public synchronized void moure() {		
+		y = y + dsy;
 	}
-
-	public void pinta(Graphics g) {
+	
+	public synchronized void pinta(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g;
 		g2d.drawImage(this.image, x, y, null);
 	}
+	
+	public boolean eliminar() {
+		boolean fora = false;
+		if (y >= 500 - ty || y <= ty) {
+			fora = true;
+		}
+		return fora;
+	}
+	
+	public void noSeguir(){
+		seguir = false;
+	}
 
 	public void run() {
-		while (true) {
+		while (seguir) {
 			// System.out.println("Movent nau numero " + this.nomNau);
 			try {
 				Thread.sleep(this.v);
@@ -257,12 +361,5 @@ class Dispar extends Thread {
 			moure();
 		}
 	}
-
-	public void esquerra() {
-		this.dsx = -10;
-	}
-
-	public void dreta() {
-		this.dsx = 10;
-	}
+	
 }
